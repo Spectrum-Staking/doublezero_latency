@@ -1,4 +1,4 @@
-# Solana Validator Latency and Status Checker
+# Solana Gossip Latency Checker for Doublezero
 
 This script checks the status and latency of Solana validators connected to the `doublezero0` network interface. It correlates IP addresses from the local routing table with Solana's gossip and validator information to determine if an IP belongs to an active validator.
 
