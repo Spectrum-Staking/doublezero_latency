@@ -282,7 +282,7 @@ def main():
             if identity_key in active_validator_identities:
                 status = 'validator'
                 # Look up the validator name from the details map
-                name = validator_info.get(identity_key, "Unknown")
+                name = validator_info.get(identity_key, "Unknown")                
                 print(f"SUCCESS: IP {ip} with identity {identity_key} is an active validator named '{name}'.")
             else:
                 status = 'gossip'
@@ -292,7 +292,7 @@ def main():
             results.append([ip, status, name, latency])
         else:
             city, country = get_ip_location(ip)
-            results.append([ip, status, name, latency, city, country])
+            results.append([ip, status, name.replace(',', ''), latency, city, country])
 
     # Save the results to a CSV file
     try:
