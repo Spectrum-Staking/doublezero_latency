@@ -16,8 +16,11 @@ This script checks the status and latency of Solana validators connected to the 
     ```bash
     python3 dz_latency.py
     ```
-It is possible to read a list of IPs using `--ip_list <file_name>`  flag instead of routing table. This is useful
+
+Flags:
+- `--ip_list <file_name>` - Use to read a list of IPs using instead of routing table. This is useful
 for back-to-back latency comparison between Internet and Doublezero network.
+- `--no_geo` - Disable geolocation.
 
 The script will then execute the necessary commands and generate a `dz_latency_result.csv` file in the same directory.
 
@@ -34,4 +37,5 @@ The script performs the following steps:
     -   Pings the IP to measure latency.
     -   Looks up the IP in the gossip data to find its associated validator identity public key.
     -   Checks if the identity public key is in the list of active validators.
+    -   Looks up geolocation using ip-api.com and adds city/country to CSV file.
 4.  **Generate CSV:** The results are compiled and saved to `dz_latency_result.csv`.

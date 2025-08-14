@@ -197,6 +197,37 @@ def load_validator_details():
         print(f"An unexpected error occurred while loading validator details: {e}")
         return {}
 
+def get_ip_location(ip_address):
+    """
+    Fetches the city and country for a given IP address using ip-api.com.
+
+    Args:
+        ip_address (str): The IP address to look up.
+
+    Returns:
+        tuple: A tuple containing (city, country) or ('Unknown', 'Unknown') if lookup fails.
+    """
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=5)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()
+
+        if data.get("status") == "success":
+            city = data.get("city", "Unknown")
+            country = data.get("country", "Unknown")
+            print(f"Location for {ip_address}: {city}, {country}")
+            return city, country
+        else:
+            print(f"Could not get location for {ip_address}: {data.get('message', 'Unknown error')}")
+            return 'Unknown', 'Unknown'
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching location for {ip_address}: {e}")
+        return 'Unknown', 'Unknown'
+    except Exception as e:
+        print(f"An unexpected error occurred during location lookup for {ip_address}: {e}")
+        return 'Unknown', 'Unknown'
+
+import requests
 def main():
     """
     Main function to orchestrate the validator checking process.
@@ -205,6 +236,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Check validator status and latency.")
     parser.add_argument("--ip_list", help="Path to a file containing a list of IP addresses, one per line.")
+    parser.add_argument("--no_geo", action="store_true", help="Enable geolocation lookup.")
     args = parser.parse_args()
 
     print("Starting validator check...")
@@ -256,14 +288,21 @@ def main():
                 status = 'gossip'
                 print(f"INFO: IP {ip} has an identity ({identity_key}) but is NOT in the active validator list.")
         
-        results.append([ip, status, name, latency])
+        if args.no_geo:
+            results.append([ip, status, name, latency])
+        else:
+            city, country = get_ip_location(ip)
+            results.append([ip, status, name, latency, city, country])
 
     # Save the results to a CSV file
     try:
         with open(OUTPUT_FILE, 'w', newline='') as f:
             writer = csv.writer(f)
             # Write the header
-            writer.writerow(['IP', 'Status', 'Validator Name', 'Latency'])
+            if args.no_geo:
+                writer.writerow(['IP', 'Status', 'Validator Name', 'Latency', 'City', 'Country'])
+            else:
+                writer.writerow(['IP', 'Status', 'Validator Name', 'Latency'])
             # Write the data rows
             writer.writerows(results)
         print(f"\nProcess complete. Results saved to '{OUTPUT_FILE}'")
